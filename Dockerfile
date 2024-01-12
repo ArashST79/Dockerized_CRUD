@@ -6,5 +6,5 @@ WORKDIR /opt/services/crudapp/src
 RUN pip install -r requirements.txt
 ADD . /opt/services/crudapp/src
 EXPOSE 5080
-CMD ["python", "app.py"]
+CMD ["python", "main.py"]
 

@@ -123,9 +123,8 @@ now we test each method with postman :
 
 ## question
 
-مفهوم stateless به چه معناست؟ ما چه استفاده‌ای از این مفهوم در آزمایش خود کرده‌ایم؟
+1:
 Each Request is Independent:
-
 Each HTTP request that the Flask application handles contains all the necessary information for the server to process the request. The server does not rely on any stored information about previous requests.
 No Session State:
 

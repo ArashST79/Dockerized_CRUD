@@ -1,5 +1,5 @@
 # Intro to Project
-In this experiment, we are creating a simple CRUD service using the Flask framework, PostgreSQL database, and Nginx for load balancing. The target project is a name retrieval app that includes a database with a table having two columns: id and user_name.
+In this experiment, we are creating a simple CRUD service using the Flask framework, PostgreSQL database, and Nginx for load balancing. The target project is a name retrieval app that includes a database with a table having two columns: id and name.
 
 # Docker File
 this is a docker file for the flaskapp with python. It's the main code for handling the requests

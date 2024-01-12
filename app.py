@@ -32,7 +32,7 @@ def manage_user(user_id):
             db_session.commit()
             return jsonify({"message": "Name changed", "current_name": user.user_name})
         except KeyError:
-            return jsonify({"error": "Invalid request data"}), 400
+            return jsonify({"error": "Invalid request data!"}), 400
     
     elif request.method == 'DELETE':
         db_session.delete(user)

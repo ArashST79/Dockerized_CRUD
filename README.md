@@ -115,10 +115,10 @@ now we test each method with postman :
 ## updating a user with ID 1
 ![Screenshot (706)](https://github.com/ArashST79/Dockerized_CRUD/assets/31709401/f7d04adb-8c04-4074-a7d2-54c6b63c1cac)
 
-# deleting user with ID 1
+## deleting user with ID 1
 ![Screenshot (707)](https://github.com/ArashST79/Dockerized_CRUD/assets/31709401/d355495c-e81f-4316-b995-af5fcd91e00b)
 
-# getting a user with ID 1 which is deleted 
+## getting a user with ID 1 which is deleted 
 ![Screenshot (708)](https://github.com/ArashST79/Dockerized_CRUD/assets/31709401/c29ef0aa-a8cf-403f-8392-7c9808a83272)
 
 

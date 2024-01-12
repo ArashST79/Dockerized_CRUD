@@ -2,17 +2,17 @@
 In this experiment, we are creating a simple CRUD service using the Flask framework, PostgreSQL database, and Nginx for load balancing. The target project is a name retrieval app that includes a database with a table having two columns: id and user_name.
 
 # Docker File
-this is a docker file for the crudapp with python. It's the main code for handling the requests
+this is a docker file for the flaskapp with python. It's the main code for handling the requests
 ```
 FROM python:3
 
-RUN mkdir -p /opt/services/crudapp/src
-COPY ./requirements.txt /opt/services/crudapp/src/
-WORKDIR /opt/services/crudapp/src
+RUN mkdir -p /opt/services/flaskapp/src
+COPY ./requirements.txt /opt/services/flaskapp/src/
+WORKDIR /opt/services/flaskapp/src
 RUN pip install -r requirements.txt
-ADD . /opt/services/crudapp/src
-EXPOSE 5080
-CMD ["python", "main.py"]
+ADD . /opt/services/flaskapp/src
+EXPOSE 5090
+CMD ["python", "app.py"]
 ```
 
 # Docker-Compose
@@ -33,7 +33,7 @@ services:
     env_file:
       - env_file
     volumes:
-      - .:/opt/services/crudapp/src
+      - .:/opt/services/flaskapp/src
     networks:
       - db_nw
       - web_nw
@@ -48,7 +48,7 @@ services:
     networks:
       - web_nw
     depends_on: 
-      - crudapp
+      - flaskapp
 networks:
   db_nw:
     driver: bridge
@@ -77,7 +77,7 @@ cd Dockerized_CRUD
 then we should build up the docker with these three lines
 ```
 docker-compose up -d db
-docker-compose run --rm crudapp /bin/bash -c "cd /opt/services/crudapp/src && python -c  'import database; database.init_db()'"
+docker-compose run --rm flaskapp /bin/bash -c "cd /opt/services/flaskapp/src && python -c  'import database; database.init_db()'"
 docker-compose up
 ```
 

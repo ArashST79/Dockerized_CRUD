@@ -8,12 +8,12 @@ services:
       - env_file
     networks:
       - db_nw
-  crudapp:
+  flaskapp:
     build: .
     env_file:
       - env_file
     volumes:
-      - .:/opt/services/crudapp/src
+      - .:/opt/services/flaskapp/src
     networks:
       - db_nw
       - web_nw
@@ -28,7 +28,7 @@ services:
     networks:
       - web_nw
     depends_on: 
-      - crudapp
+      - flaskapp
 networks:
   db_nw:
     driver: bridge

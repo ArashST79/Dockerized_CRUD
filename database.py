@@ -2,30 +2,20 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
-# Database connection parameters
-db_params = {
-    'user': 'postgres',
-    'password': 'postgres',
-    'host': 'db',
-    'port': '5432',
-    'database': 'postgres',
-}
+user = 'postgres'
+pwd = 'postgres'
+db = 'postgres'
+host = 'db'
+port = '5432'
+engine = create_engine('postgresql://%s:%s@%s:%s/%s' % (user, pwd, host, port, db)) 
 
-# Create the database engine
-engine = create_engine(
-    f"postgresql://{db_params['user']}:{db_params['password']}@{db_params['host']}:{db_params['port']}/{db_params['database']}"
-)
-
-# Create a scoped session
-db_session = scoped_session(sessionmaker(autocommit=False, autoflush=False, bind=engine))
-
-# Create a declarative base
+db_session = scoped_session(sessionmaker(autocommit=False,
+                                         autoflush=False,
+                                         bind=engine))
 Base = declarative_base()
 Base.query = db_session.query_property()
 
 def init_db():
-    # Importing the model module where SQLAlchemy models are defined
-    import model
     
-    # Create tables based on the defined models
+    import model
     Base.metadata.create_all(bind=engine)

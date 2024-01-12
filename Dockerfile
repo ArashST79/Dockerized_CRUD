@@ -1,10 +1,10 @@
 FROM python:3
 
-RUN mkdir -p /opt/services/flaskapp/src
-COPY ./requirements.txt /opt/services/flaskapp/src/
-WORKDIR /opt/services/flaskapp/src
+RUN mkdir -p /opt/services/crudapp/src
+COPY ./requirements.txt /opt/services/crudapp/src/
+WORKDIR /opt/services/crudapp/src
 RUN pip install -r requirements.txt
-ADD . /opt/services/flaskapp/src
-EXPOSE 5090
+ADD . /opt/services/crudapp/src
+EXPOSE 5080
 CMD ["python", "app.py"]
 

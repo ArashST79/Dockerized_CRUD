@@ -6,7 +6,7 @@ user = 'postgres'
 pwd = 'postgres'
 db = 'postgres'
 host = 'db'
-port = '5432'
+port = '5442'
 engine = create_engine('postgresql://%s:%s@%s:%s/%s' % (user, pwd, host, port, db)) 
 
 db_session = scoped_session(sessionmaker(autocommit=False,

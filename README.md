@@ -1,79 +1,84 @@
-## بخش عملی
-### تعریف پروژه
-در این آزمایش یک سرویس ساده CRUD با استفاده از فریم‌ورک Flask، دیتابیس PostgreSQL و سرویس Nginx برای load balancing ایجاد می‌کنیم. پروژه مدنظر یک اپ بازیابی نام است که در دیتابیس خود یک table با دو ستون id به عنوان primary key و name که یک string است را شامل می‌شود. 
-### نمودار UML
-به صورت زیر سه کامپوننت (کانتینر) مدنظر را به هم وصل می‌کنیم. بدین ترتیب ریکوئست از سمت کاربر آمده و به nginx می‌رسد، پس از load_balancing این کامپوننت تشخیص می‌دهد که ریکوئست به کجا رفته و فایل اپلیکیشن کوئری صحیح را به دیتابیس ارسال می‌کند.
+# Intro to Project
+In this experiment, we are creating a simple CRUD service using the Flask framework, PostgreSQL database, and Nginx for load balancing. The target project is a name retrieval app that includes a database with a table having two columns: id and user_name.
 
-<img width="751" alt="image" src="https://github.com/ShayanEmzed/SEL-HW6/assets/60621655/af556b42-f845-4a6a-971c-38b3f515927e">
-
-### فایل‌های docker
-برای اپلیکیشن flask فایل داکر زیر را می‌سازیم:
-
-<img width="490" alt="image" src="https://github.com/ShayanEmzed/SEL-HW6/assets/60621655/09b537b9-60d6-4f08-8879-2ad9c11a5f1d">
-
-با این کار پکیج‌های لازم را نصب کرده و اپلیکیشن را بر روی پورت ۵۰۹۰ بالا می‌آوریم. از آنجا که استفاده ما از دو image دیگر (پوستگرس و انجینیکس) در حد ایمیج‌های روی داکرهاب است، برای بالا آوردن آنها و همچنین برقراری اتصال بین این سه کامپوننت از docker-compose کمک می‌گیریم:
-
-<img width="646" alt="image" src="https://github.com/ShayanEmzed/SEL-HW6/assets/60621655/29bc545c-452c-4926-9ead-dc6a84147ad9">
-
-با استفاده از فایل بالا و تعریف network ها کانکشن‌های بین کانتینرها را ایجاد می‌کنیم. همچنین تیبل ایجاد شده در دیتابیس را ذخیره می‌کنیم تا با پایین آمدن کانتینر مرتبط، اطلاعات را از دست ندهیم.
-### بالا آوردن سرویس‌های بر روی ابزار رایگان تست داکر
-برای تست پروژه از ابزار رایگان آزمایش داکر استفاده می‌کنیم. ابتدا یک session ایجاد کرده و پروژه را با دستور زیر clone می‌کنیم:
+# Docker File
+this is a docker file for the crudapp with python. It's the main code for handling the requests
 ```
-git clone https://github.com/ShayanEmzed/SEL-HW6.git
-```
-سپس با دستور زیر به فولدر پروژه می‌رویم:
-```
-cd SEL-HW6/
+FROM python:3
+
+RUN mkdir -p /opt/services/crudapp/src
+COPY ./requirements.txt /opt/services/crudapp/src/
+WORKDIR /opt/services/crudapp/src
+RUN pip install -r requirements.txt
+ADD . /opt/services/crudapp/src
+EXPOSE 5080
+CMD ["python", "main.py"]
 ```
 
-حال با وارد کردن دستورهای زیر image ها را build کرده و سه کانتینر را بالا می‌آوریم:
+# Docker-Compose
+This is Docker compose file. we have three dockers here. db as postgres database image, crud app which we build it's image with the previous docker file, and also nginx docker as nginx pre-build image for load balancing
+```
+version: '3'
+services:
+  db:
+    image: "postgres:9.6.5"
+    volumes:
+      - "dbdata:/var/lib/postgresql/data"
+    env_file:
+      - env_file
+    networks:
+      - db_nw
+  crudapp:
+    build: .
+    env_file:
+      - env_file
+    volumes:
+      - .:/opt/services/crudapp/src
+    networks:
+      - db_nw
+      - web_nw
+    depends_on:
+      - db
+  nginx:
+    image: "nginx:1.13.5"
+    ports:
+      - "8080:80"
+    volumes:
+      - ./conf.d:/etc/nginx/conf.d
+    networks:
+      - web_nw
+    depends_on: 
+      - crudapp
+networks:
+  db_nw:
+    driver: bridge
+  web_nw:
+    driver: bridge
+volumes:
+  dbdata:
+```
+# docker tool
+we use labs.play-with-docker.com as docker. our project our uploaded here
+
+# building up docker process
+
+first we should clone our project here
+
+```
+git clone https://github.com/ArashST79/Dockerized_CRUD.git
+```
+
+changing directory
+
+```
+cd Dockerized_CRUD
+```
+
+then we should build up the docker with these three lines
 ```
 docker-compose up -d db
-```
-با دستور بالا دیتابیس پوستگرس را بالا می‌آوریم.
-```
-docker-compose run --rm flaskapp /bin/bash -c "cd /opt/services/flaskapp/src && python -c  'import database; database.init_db()'"
-```
-با دستور بالا تیبل مدنظر را می‌سازیم.
-```
+docker-compose run --rm crudapp /bin/bash -c "cd /opt/services/crudapp/src && python -c  'import database; database.init_db()'"
 docker-compose up
 ```
-و با دستور بالا تمامی سه کانیتر را ران می‌کنیم.
-با وارد کردن دستور docker ps، کانتینرهای در حال اجرا را بررسی می‌کنیم:
 
-### تست پروژه با استفاده از postman
-پورت 8080 را بر روی ابزار اجرای داکر باز می‌کنیم و با تصویر زیر مواجه می‌شویم چرا که این آدرس در اپ flask ما تعریف نشده:
-<img width="833" alt="image" src="https://github.com/ShayanEmzed/SEL-HW6/assets/60621655/805bd983-4d00-4dce-9f69-0bf560e80e23">
-
-برای تست CRUD بر روی postman از url بالا به اضافه /users برای ساختن کاربر و /user/id برای دریافت، آپدیت و حذف کاربر استفاده می‌کنیم.
-تست Create: با استفاده از متد post و ورودی دادن یک نام، عمل create را انجام می‌دهیم:  
-<img width="874" alt="image" src="https://github.com/ShayanEmzed/SEL-HW6/assets/60621655/cae79b74-9057-4e13-be15-253453f4669e">
-
-همانطور که در ریسپانس سرور مشاهده می‌کنیم، کاربر به درستی ایجاد شد.  
-تست Read: حال با id دریافت شده از ریسپانس ریکوئست قبل، نام کاربر را دریافت می‌کنیم.  
-<img width="859" alt="image" src="https://github.com/ShayanEmzed/SEL-HW6/assets/60621655/2756ccf4-f22a-4057-8aa2-3ffb10ea8f69">
-
-اگر id را برابر ۲ ورودی دهیم خروجی سرور نشان می‌دهد که همچنین user ای وجود ندارد:  
-<img width="856" alt="image" src="https://github.com/ShayanEmzed/SEL-HW6/assets/60621655/0339879b-497c-4123-abdc-6ed6e5094267">
-
-تست Update: با تشخیص id مدنظر در URL و ورودی دادن نام جدید، نام کاربر را آپدیت می‌کنیم:  
-<img width="862" alt="image" src="https://github.com/ShayanEmzed/SEL-HW6/assets/60621655/14d6e43f-6f9f-4167-86f7-5173c4cd21bc">
-
-با دریافت دوباره نام کاربر خواهیم داشت:  
-<img width="862" alt="image" src="https://github.com/ShayanEmzed/SEL-HW6/assets/60621655/731ce7c3-75a1-4c41-8acf-ee0b858d3b35">
-
-که نشان می‌دهد نام به درستی آپدیت شده است.  
-تست Delete: همانند دو URL قبلی عمل کرده ولی این سری از متد delete استفاده می‌کنیم. با حذف id یک خواهیم داشت:  
-<img width="862" alt="image" src="https://github.com/ShayanEmzed/SEL-HW6/assets/60621655/2927aa2c-9809-4d75-8a03-b788c230e28b">
-
-با دریافت دوباره این یوزر می‌بینیم که سرور می‌گوید چنین کاربری نداریم:  
-<img width="862" alt="image" src="https://github.com/ShayanEmzed/SEL-HW6/assets/60621655/470bf3a8-58c1-44f3-b990-fbb241b5af68">
-
-
-## بخش تئوری
-1. از چه نمودار/نمودارهای UML ای برای مدل‌سازی معماری MicroService خود استفاده کرده‌اید؟  
-می‌توان از نمودارهای component diagram یا deployment diagram برای مدل‌سازی معماری میکروسرویس استفاده کرد. نشان دادن هز کامپوننت و image و نحوه اتصال آنها در نمودار اول، و نشان دادن نجوه جایگیری کانتینرها بر روی سیستم و تعامل آنها در نمودار دوم ممکن خواهد بود. در بخش عملی از نمودار component diagram استفاده شده است.
-2. مفهوم Domain-driven Design یا DDD چه ارتباطی با معماری MicroService دارد؟ در حد دو-سه خط توضیح دهید.  
-طراحی Domain Driven به ما این قابلیت را می‌دهد که معماری مایکروسرویس خود را با شکستن سیستم بزرگ‌تر به اجزای قابل توسعه و جامع، بهتر شناخته و همچنین رابطه بین هر سرویس با دیگر اعضا را شناسایی کنیم. از آنجا که در DDD به دنبال شناخت و ایجاد مدل‌هایی هستیم که بهتر منطق بیزینسس مدنظر را پیاده کنیم، در مرحله پیاده‌سازی می‌توان از این مدل‌ها استفاده کرده و در یک معماری microservice مثل استفاده از docker و dockerize کردن، بهترین نحوه وصل کردن image های مختلف به هم را پیدا کنیم.
-3. آیا Docker Compose یک ابزار Orchestration است؟ در حد دو-سه خط توضیح دهید.
-از آنجا که ابزارهای orchestration برای automate کردن کانفیگوریشن، هماهنگی و پروسس‌هایی مثل data management کاربرد دارند، می‌توان docker-compose را یکی از این ابزارها در نظر گرفت. همانطور که در بخش عملی مشاهده شد، در محیط هایی که از چندین کانتینر استفاده می‌کنیم احتمالا به networking یا ذخیره دیتا نیاز پیدا می‌کنیم که docker-compose ابزار مناسبی برای این کار خواهد بود تا با وارد کردن یک دستور و بدون نیاز به ایجاد کانتینرها به صورت جدا و سپس تعریف نتورکینگ، این کار را با یک دستور به سادگی انجام دهیم.
+now we have three containers running on the system

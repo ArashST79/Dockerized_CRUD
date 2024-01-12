@@ -121,4 +121,17 @@ now we test each method with postman :
 ## getting a user with ID 1 which is deleted 
 ![Screenshot (708)](https://github.com/ArashST79/Dockerized_CRUD/assets/31709401/c29ef0aa-a8cf-403f-8392-7c9808a83272)
 
+## question
+
+مفهوم stateless به چه معناست؟ ما چه استفاده‌ای از این مفهوم در آزمایش خود کرده‌ایم؟
+Each Request is Independent:
+
+Each HTTP request that the Flask application handles contains all the necessary information for the server to process the request. The server does not rely on any stored information about previous requests.
+No Session State:
+
+The application does not maintain session state between requests. Each request is treated independently, and there is no reliance on any information stored on the server between requests.
+Scalability:
+
+Stateless applications are often more scalable because they do not require the server to maintain state information for each client. This makes it easier to distribute requests across multiple servers (load balancing) since each server can handle any request independently.
+In the specific case of a CRUD service, being stateless means that each API request to create, read, update, or delete data contains all the necessary information for the server to perform the operation. The server does not store information about the client's session or the state of previous requests.
 
